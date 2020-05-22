@@ -9,22 +9,30 @@
 ### Utilizar requests en la consola de python3
 
 - Importamos la libreria requests y hemos guardado en una variable todo el contenido que nos ha devuelto la api de swapi según los parámetros introducidos.
+
 `` import requests ``
+
 ``r=requests.get("https://swapi.dev/api/people/1/") `` 
+
 ``r ``
+
 - La variable r es una respuesta 200.
 ```{r}
 Response [200] 
 ```
 
 - Es muy importante saber el estado de la respuesta porque si nos devuelve un 404 no tendremos información. Para ello usaremos 'variable.status_code'
+
 `` r.status_code``
+
 ```{r}
 200
 ```
 
 - Es de utlidad saber a qué url le estamos haciendo la petición de la siguiente forma
+
 `` r.url ``
+
 ```{r}
 'https://swapi.dev/api/people/1/'
 ```
