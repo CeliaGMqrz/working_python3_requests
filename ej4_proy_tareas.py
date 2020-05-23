@@ -10,8 +10,8 @@
 
 #Lo primero es importar la librería requests
 import requests
-#Importamos también la herramienta para leer json 
-import json
+#Importamos etree 
+from lxml import etree
 #Importar la librería os que va leer nuestra variable de entorno
 import os
 
@@ -23,25 +23,34 @@ key=os.environ["key"]
 
 #Vamos a crear un diccionario que guarde nuestros parámetros
 payload = {'key':key}
-
-#Hacemos la petición, guardandola en una variable r, añadiendo los parametros que necesitamos usando params e indicando el diccionario creado previamente.
-r=requests.get(url_base+'projects.json',params=payload)
-
 #Pedimos el nombre del proyecto
 nom_proyecto=input("\nIntroduce el nombre del proyecto: ")
-#Para asegurarnos que no hay errores consultamos el estado de la petición.
+#Necesitaremos el identificador del proyecto
+id_project=""
+#Hacemos la petición, guardandola en una variable r, añadiendo los parametros que necesitamos usando params e indicando el diccionario creado previamente.
+r=requests.get(url_base+'projects.xml',params=payload)
 
+
+
+#Para asegurarnos que no hay errores consultamos el estado de la petición.
 pjs=[]
 if r.status_code == 200:
     #Guardamos en la variable doc el contenido leido en json
-    doc = r.json()
+    doc = etree.fromstring(r.text.encode('utf-8'))
     #Obtenemos los nombres de los proyectos
-    for proyecto in doc["projects"]:
-        if proyecto["name"] == nom_proyecto:
-            pjs.append(proyecto["name"])
-    
-    if nom_proyecto in pjs:
-        print(nom_proyecto)
-    else:
-        print("Error")
-    
+    projects=doc.xpath("project")
+    for p in projects:
+        if p.xpath("name/text()")[0] == nom_proyecto:
+            id_project=p.xpath("id/text()")[0]
+
+
+payload = {'status_id':'open','limit':'5','project_id':id_project,'key':key}
+r=requests.get(url_base+'issues.xml',params=payload)
+if r.status_code == 200:
+	doc = etree.fromstring(r.text.encode ('utf-8'))
+	tareas=doc.xpath("issue")
+	for t in tareas:
+		print (t.xpath("assigned_to/@name")[0])
+		print (t.xpath("subject/text()")[0])
+else:
+	print ("Error de proyecto")
